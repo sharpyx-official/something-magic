@@ -1,67 +1,30 @@
-import java.util.UUID
-import kotlin.math.abs
-
-const val CATEGORY_COFFEE = 0
-const val CATEGORY_PRODUCTS = 1
-const val CATEGORY_SUBSCRIPTIONS = 2
-
-val categories = listOf(Category("Coffee"), Category("Products"), Category("Subscriptions"))
-
-val transactions = listOf(
-    Transaction(UUID.randomUUID(), 230.0, categories[CATEGORY_COFFEE]),
-    Transaction(UUID.randomUUID(), 180.0, categories[CATEGORY_COFFEE]),
-    Transaction(UUID.randomUUID(), 270.0, categories[CATEGORY_COFFEE]),
-    Transaction(UUID.randomUUID(), 1267.5, categories[CATEGORY_PRODUCTS]),
-    Transaction(UUID.randomUUID(), 851.2, categories[CATEGORY_PRODUCTS]),
-    Transaction(UUID.randomUUID(), 200.2, categories[CATEGORY_PRODUCTS]),
-    Transaction(UUID.randomUUID(), 550.0, categories[CATEGORY_SUBSCRIPTIONS]),
-    Transaction(UUID.randomUUID(), 259.0, categories[CATEGORY_SUBSCRIPTIONS]),
-    Transaction(UUID.randomUUID(), 159.0, categories[CATEGORY_SUBSCRIPTIONS]),
-    Transaction(UUID.randomUUID(), 99.0, categories[CATEGORY_SUBSCRIPTIONS]),
-)
-
-fun calculateCategorySummAverage(): Map<Category, Double> {
-    val categoriesAverageSumm: MutableMap<Category, Double> = mutableMapOf()
-
-    categories.forEach { category ->
-        val transactionList = transactions.filter { it.category == category }.map { it.amount }
-        categoriesAverageSumm[category] = transactionList.average()
-    }
-
-    println(categoriesAverageSumm)
-
-    return categoriesAverageSumm
-}
-
-fun getCategoryBySumm(summ: Double): List<Category> {
-    val categoriesAverageSumm = calculateCategorySummAverage()
-
-    var min = Double.MAX_VALUE
-    var result: Pair<Category?, Double> = null to summ
-    var resultByStrongEquality: Category? = null
-
-    categoriesAverageSumm.entries.forEach { entry ->
-        val diff = abs(entry.value - summ)
-
-        if (diff < min) {
-            min = diff
-            result = entry.key to entry.value
-        }
-    }
-
-    transactions.forEach { transaction ->
-        if (transaction.amount == summ) {
-            resultByStrongEquality = transaction.category
-        }
-    }
-
-    return listOfNotNull(resultByStrongEquality, if (result.first == resultByStrongEquality) null else result.first)
-}
+/**
+ * ПРИВЕТ! Тут важная информация:
+ *
+ * Написано чуть ли не на коленке за нехваткой времени. Но идея, в целом, передана.
+ * Решение и логика поиска нужной категории описана в методах в классе Application.
+ *
+ * В данном решении взял за учитываемый параметр только саму сумму расхода, но в рамках "мозгового штурма"
+ * были и другие идеи.
+ *
+ * P.S.'ы
+ * 1. Само собой это решение не говорит о том, что все было бы реализовано именно так. Была бы база, были бы
+ *    дополнительная(-ые) мета-таблицы в ней и тд, и тп.
+ * 2. Упор на производительность в своем решении не делал (только самая базовая из соображений адекватности).
+ * 3. Хорошего утра/дня/вечера!
+ */
+import entities.Category
 
 fun main(args: Array<String>) {
+    val application = Application()
+
+    // Просто пример для комментария в методе addTransaction, в классе Application
+    application.createCategory("Health")
+    application.addTransaction(Category("Health"), 10000.0)
+
     while (true) {
         val inputSumm = readlnOrNull()?.toDoubleOrNull() ?: return
-        val category = getCategoryBySumm(inputSumm)
+        val category = application.getCategoryBySumm(inputSumm)
 
         println(category)
     }
